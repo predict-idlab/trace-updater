@@ -1,0 +1,11 @@
+include trace_updater/trace_updater.min.js
+include trace_updater/trace_updater.min.js.map
+include trace_updater/async-*.js
+include trace_updater/async-*.js.map
+include trace_updater/*-shared.js
+include trace_updater/*-shared.js.map
+include trace_updater/metadata.json
+include trace_updater/package-info.json
+include README.md
+include LICENSE
+include package.json

@@ -1,0 +1,45 @@
+{
+  "src/lib/components/TraceUpdater.react.js": {
+    "description": "ExampleComponent is an example component.\nIt takes a property, `aim`, and displays it.\nIt renders an input with the property `value`\nwhich is editable by the user.",
+    "displayName": "TraceUpdater",
+    "methods": [],
+    "props": {
+      "id": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "The ID used to identify this component in Dash callbacks."
+      },
+      "gdID": {
+        "type": {
+          "name": "string"
+        },
+        "required": true,
+        "description": "The id of the graph-div whose traces should be"
+      },
+      "updateData": {
+        "type": {
+          "name": "union",
+          "value": [
+            {
+              "name": "array"
+            },
+            {
+              "name": "object"
+            }
+          ]
+        },
+        "required": false,
+        "description": "The data to update the graph with, must contain the `index` property for \neach trace; either a list of dict-traces or a single trace"
+      },
+      "setProps": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "Dash-assigned callback that should be called to report property changes\nto Dash, to make them available for callbacks."
+      }
+    }
+  }
+}
