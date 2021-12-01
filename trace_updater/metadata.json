@@ -1,6 +1,6 @@
 {
   "src/lib/components/TraceUpdater.react.js": {
-    "description": "ExampleComponent is an example component.\nIt takes a property, `aim`, and displays it.\nIt renders an input with the property `value`\nwhich is editable by the user.",
+    "description": "TraceUpdater is a component which updates the trace of a given figure.\nIt takes the properties \n - gdID - which is the DCC.graph its id\n - updatedData - A list whose\n    * first object withholds the to-be applied layout\n    * second to ... object contain the updated trace data and its corresponding \n      index under the `index` attribute",
     "displayName": "TraceUpdater",
     "methods": [],
     "props": {

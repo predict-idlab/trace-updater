@@ -5,10 +5,13 @@ from dash.development.base_component import Component, _explicitize_args
 
 class TraceUpdater(Component):
     """A TraceUpdater component.
-ExampleComponent is an example component.
-It takes a property, `aim`, and displays it.
-It renders an input with the property `value`
-which is editable by the user.
+TraceUpdater is a component which updates the trace of a given figure.
+It takes the properties 
+ - gdID - which is the DCC.graph its id
+ - updatedData - A list whose
+    * first object withholds the to-be applied layout
+    * second to ... object contain the updated trace data and its corresponding 
+      index under the `index` attribute
 
 Keyword arguments:
 
