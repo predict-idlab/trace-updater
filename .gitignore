@@ -273,6 +273,4 @@ Manifest.toml
 .DS_Store
 
 # builds
-lib
-
 *.pyc
