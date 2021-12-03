@@ -7,9 +7,8 @@ app = dash.Dash(__name__)
 
 app.layout = html.Div([
     trace_updater.TraceUpdater(
-        id='input',
-        value='my-value',
-        label='my-label'
+        id='trace-updater',
+        gdID='graph-div-id'
     ),
     html.Div(id='output')
 ])
