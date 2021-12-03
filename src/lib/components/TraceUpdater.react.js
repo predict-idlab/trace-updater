@@ -1,37 +1,60 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+// used to store the previous layout obect
+var _prev_relayout = null;
+
 /**
- * TraceUpdater is a component which updates the trace of a given figure.
- * It takes the properties 
+ * TraceUpdater is a component which updates the trace-data of a plotly graph.
+ * It takes the properties
  *  - gdID - which is the DCC.graph its id
- *  - updatedData - A list whose
+ *  - sequentialUpdate - if true, each trace is updated sequentially;
+ *      i.e. Plotly.restyle is called sequentially
+ *  - updatedData - A list whose:
  *     * first object withholds the to-be applied layout
- *     * second to ... object contain the updated trace data and its corresponding 
+ *     * second to ... object contain the updated trace data and its corresponding
  *       index under the `index` attribute
  */
 export default class TraceUpdater extends Component {
+    shouldComponentUpdate(nextProps) {
+        var { updateData } = nextProps
+        if (Array.isArray(updateData) && updateData.length > 1) {
+            if (_prev_relayout === null) {
+                _prev_relayout = updateData[0];
+                return true;
+            }
+            // console.log("==============shouldComponentUpdate==============");
+            // console.log("prev layout: ", _prev_relayout);
+            // console.log("update layout: ", updateData[0]);
+            //  TODO -> use the set-state here :)
+            // do not update if the 
+            var rtrn = _prev_relayout != updateData[0];
+            // console.log("rtrn: ", rtrn);
+            _prev_relayout = updateData[0];
+            return rtrn;
+        }
+        return false;
+    }
+
     render() {
-        var { id, gdID, updateData } = this.props;
+        var { id, gdID, sequentialUpdate, updateData } = this.props;
         const traceColNames = ["hovertext", "text", "x", "y"];
         var graphDiv = document.getElementById(gdID)
-        var index, trace;
+
         if (graphDiv && Array.isArray(updateData) && updateData.length > 1) {
-            // the plotly graph div is the second child-div fo the DASH dcc graph
+            var trace, index, s_keys;
+
             graphDiv = graphDiv.getElementsByClassName('js-plotly-plot')[0];
 
-            // TODO -> do not apply this restyling in a for loop but just restructure
-            // the data in a new object and then call once:
-            //      Plotly.restyle(gd, newData, trace_indices)
-            for (let i = 1; i < updateData.length; i++) {
-                trace = updateData[i];
-                // get the trace it's index and delete it
-                index = trace.index
-                delete trace.index;
-                if (trace != null && index != null) {
-                    // put everythin in the right format
-                    traceColNames.forEach(
-                        colName => {
+            if (sequentialUpdate) {
+                for (let i = 1; i < updateData.length; i++) {
+                    trace = updateData[i];
+                    // get the trace it's index and delete it from the trace object
+                    index = trace.index
+                    delete trace.index;
+                    if (trace != null && index != null) {
+                        // put everythin in the right format
+                        for (const colName of traceColNames) {
                             if (trace[colName] == null) {
                                 delete trace[colName];
                             }
@@ -39,19 +62,47 @@ export default class TraceUpdater extends Component {
                                 trace[colName] = [trace[colName]];
                             }
                         }
-                    )
-                    // console.log("restyle trace" + new Date().toLocaleTimeString());
-                    Plotly.restyle(graphDiv, trace, index);
+                        Plotly.restyle(graphDiv, trace, index);
+                    };
                 };
-            };
-            // Apply the updated layout after the restyling took place
+            }
+            else {
+                // update the trace in a betch
+                s_keys = new Set();
+                for (let i = 1; i < updateData.length; i++) {
+                    for (const key of Object.keys(updateData[i])) {
+                        s_keys.add(key);
+                    }
+                }
+                const singleUpdateData = {};
+                for (const k of s_keys) {
+                    singleUpdateData[k] = [];
+                }
+                const index_arr = [];
+                for (let i = 1; i < updateData.length; i++) {
+                    trace = updateData[i];
+                    for (const k of s_keys) {
+                        if (trace[k] === null) {
+                            singleUpdateData[k].push([]);
+                        } else {
+                            singleUpdateData[k].push(trace[k]);
+                        }
+                    }
+                    index_arr.push(trace.index);
+                };
+
+                Plotly.restyle(graphDiv, singleUpdateData, index_arr);
+            }
+            // after the (either sequential or batch) data-updates, restyle the layout
             Plotly.relayout(graphDiv, updateData[0]);
         };
         return <div id={id}></div>;
     }
 }
 
-TraceUpdater.defaultProps = {};
+TraceUpdater.defaultProps = {
+    sequentialUpdate: true,
+};
 
 TraceUpdater.propTypes = {
     /**
@@ -65,10 +116,17 @@ TraceUpdater.propTypes = {
     gdID: PropTypes.string.isRequired,
 
     /**
-     *The data to update the graph with, must contain the `index` property for 
+     * Bool indicating whether the figure should be redrawn sequentially (i.e.)
+     * calling the restyle multiple times or at once.
+     * (still needs to be determined which is faster has the lowest memory peak)
+     */
+    sequentialUpdate: PropTypes.bool,
+
+    /**
+     * The data to update the graph with, must contain the `index` property for
      * each trace; either a list of dict-traces or a single trace
      */
-    updateData: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
+    updateData: PropTypes.array,
 
     /**
      * Dash-assigned callback that should be called to report property changes
