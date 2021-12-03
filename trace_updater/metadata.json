@@ -1,6 +1,6 @@
 {
   "src/lib/components/TraceUpdater.react.js": {
-    "description": "TraceUpdater is a component which updates the trace of a given figure.\nIt takes the properties \n - gdID - which is the DCC.graph its id\n - updatedData - A list whose\n    * first object withholds the to-be applied layout\n    * second to ... object contain the updated trace data and its corresponding \n      index under the `index` attribute",
+    "description": "TraceUpdater is a component which updates the trace-data of a plotly graph.\nIt takes the properties\n - gdID - which is the DCC.graph its id\n - sequentialUpdate - if true, each trace is updated sequentially;\n     i.e. Plotly.restyle is called sequentially\n - updatedData - A list whose:\n    * first object withholds the to-be applied layout\n    * second to ... object contain the updated trace data and its corresponding\n      index under the `index` attribute",
     "displayName": "TraceUpdater",
     "methods": [],
     "props": {
@@ -18,20 +18,23 @@
         "required": true,
         "description": "The id of the graph-div whose traces should be"
       },
-      "updateData": {
+      "sequentialUpdate": {
         "type": {
-          "name": "union",
-          "value": [
-            {
-              "name": "array"
-            },
-            {
-              "name": "object"
-            }
-          ]
+          "name": "bool"
         },
         "required": false,
-        "description": "The data to update the graph with, must contain the `index` property for \neach trace; either a list of dict-traces or a single trace"
+        "description": "Bool indicating whether the figure should be redrawn sequentially (i.e.)\ncalling the restyle multiple times or at once.\n(still needs to be determined which is faster has the lowest memory peak)",
+        "defaultValue": {
+          "value": "true",
+          "computed": false
+        }
+      },
+      "updateData": {
+        "type": {
+          "name": "array"
+        },
+        "required": false,
+        "description": "The data to update the graph with, must contain the `index` property for\neach trace; either a list of dict-traces or a single trace"
       },
       "setProps": {
         "type": {

@@ -1,7 +1,7 @@
 {
   "name": "trace_updater",
   "version": "0.0.1",
-  "description": "Dash component allowing to update multiple graph traces (more efficient than a full callback)",
+  "description": "Dash component which allows to update a dcc.Graph its traces. This component is data efficient as it (1) only sends the to-be-updated traces (and not the whole) from the back-end to the client-side and (2) only updates the traces that have changed (and does not redraw the whole figure).",
   "repository": {
     "type": "git",
     "url": "git://github.com/predict-idlab/trace-updater.git"
@@ -22,7 +22,7 @@
     "build:activated": "npm run build:js && npm run build:backends-activated"
   },
   "author": "Jonas Van Der Donckt <jonvdrdo.vanderdonckt@ugent.be>",
-  "license": "MIT",
+  "license": "imec license",
   "dependencies": {
     "ramda": "^0.26.1"
   },
