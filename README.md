@@ -1,19 +1,28 @@
 # Dash trace updater
 
-Dash trace updater is a Dash component library.
+`TraceUpdater` is **dash component** which allows to update a dcc.Graph its traces.
+This component is **data efficient** as it:
+1. sends only the to-be-updated traces (and not the whole) from the back-end to the client-side
+2. updates only the traces that have changed (and does not redraw the whole figure)
 
+🚨 this package is tightly coupled with [`predict-idlab/plotly-resampler`](https://github.com/predict-idlab/plotly-resampler) 🚨
+
+---
 Get started with:
 1. Install Dash and its dependencies: https://dash.plotly.com/installation
 2. Run `python usage.py`
 3. Visit http://localhost:8050 in your web browser
 
+
+## Usage
+
+This is work in progress 🚧 
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md)
 
-### Install dependencies
-
-If you have selected install_dependencies during the prompt, you can skip this part.
+### 1. Install dependencies
 
 1. Install npm packages
     ```
@@ -21,8 +30,8 @@ If you have selected install_dependencies during the prompt, you can skip this p
     ```
 2. Create a virtual env and activate.
     ```
-    $ virtualenv venv
-    $ . venv/bin/activate
+    $ virtualenv .venv
+    $ source .venv/bin/activate
     ```
     _Note: venv\Scripts\activate for windows_
 
@@ -35,7 +44,7 @@ If you have selected install_dependencies during the prompt, you can skip this p
     $ pip install -r tests/requirements.txt
     ```
 
-### Write your component code in `src/lib/components/TraceUpdater.react.js`.
+### 2. Write / update component code in `src/lib/components/TraceUpdater.react.js`.
 
 - The demo app is in `src/demo` and you will import your example component code into your demo app.
 - Test your code in a Python environment:
@@ -59,11 +68,11 @@ If you have selected install_dependencies during the prompt, you can skip this p
 ### Create a production build and publish:
 
 1. Build your code:
-    ```
+    ```bash
     $ npm run build
     ```
 2. Create a Python distribution
-    ```
+    ```bash
     $ python setup.py sdist bdist_wheel
     ```
     This will create source and wheel distribution in the generated the `dist/` folder.
@@ -71,21 +80,21 @@ If you have selected install_dependencies during the prompt, you can skip this p
     for more information.
 
 3. Test your tarball by copying it into a new environment and installing it locally:
-    ```
+    ```bash
     $ pip install trace_updater-0.0.1.tar.gz
     ```
 
 4. If it works, then you can publish the component to NPM and PyPI:
     1. Publish on PyPI
-        ```
+        ```bash
         $ twine upload dist/*
         ```
     2. Cleanup the dist folder (optional)
-        ```
+        ```bash
         $ rm -rf dist
         ```
     3. Publish on NPM (Optional if chosen False in `publish_on_npm`)
-        ```
+        ```bash
         $ npm publish
         ```
         _Publishing your component to NPM will make the JavaScript bundles available on the unpkg CDN. By default, Dash serves the component library's CSS and JS locally, but if you choose to publish the package to NPM you can set `serve_locally` to `False` and you may see faster load times._
