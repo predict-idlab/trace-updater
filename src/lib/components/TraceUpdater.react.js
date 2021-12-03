@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 // used to store the previous layout obect
 var _prev_relayout = null;
+var _first_time = true;
 
 /**
  * TraceUpdater is a component which updates the trace-data of a plotly graph.
@@ -45,6 +46,7 @@ export default class TraceUpdater extends Component {
             var trace, index, s_keys;
 
             graphDiv = graphDiv.getElementsByClassName('js-plotly-plot')[0];
+            // console.log("graphDiv: ", graphDiv);
 
             if (sequentialUpdate) {
                 for (let i = 1; i < updateData.length; i++) {
@@ -62,6 +64,7 @@ export default class TraceUpdater extends Component {
                                 trace[colName] = [trace[colName]];
                             }
                         }
+                        trace.visible = graphDiv._fullData[index].visible;
                         Plotly.restyle(graphDiv, trace, index);
                     };
                 };
@@ -74,10 +77,13 @@ export default class TraceUpdater extends Component {
                         s_keys.add(key);
                     }
                 }
+                s_keys.delete("visible");
+
                 const singleUpdateData = {};
                 for (const k of s_keys) {
                     singleUpdateData[k] = [];
                 }
+                singleUpdateData.visible = [];
                 const index_arr = [];
                 for (let i = 1; i < updateData.length; i++) {
                     trace = updateData[i];
@@ -88,9 +94,9 @@ export default class TraceUpdater extends Component {
                             singleUpdateData[k].push(trace[k]);
                         }
                     }
+                    singleUpdateData.visible.push(graphDiv._fullData[trace.index].visible);
                     index_arr.push(trace.index);
                 };
-
                 Plotly.restyle(graphDiv, singleUpdateData, index_arr);
             }
             // after the (either sequential or batch) data-updates, restyle the layout
