@@ -51,6 +51,12 @@ export default class TraceUpdater extends Component {
                     // as it is not a valid attribute for Plotly.restyle
                     index = trace.index
                     delete trace.index;
+
+                    if (Array.isArray(trace.x) && trace.x.length < 1) {
+                        delete trace.x;
+                        delete trace.y;
+                    }
+
                     if (trace != null && index != null) {
                         // put everything in the right format & call restyle for each
                         // trace
