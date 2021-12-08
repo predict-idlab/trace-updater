@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 
-var _prev_layout = null;
+let _prev_layout = null;
 
 
 /**
@@ -23,7 +23,7 @@ export default class TraceUpdater extends Component {
 
 
     shouldComponentUpdate(nextProps) {
-        var { updateData } = nextProps
+        let { updateData } = nextProps
         if (Array.isArray(updateData) && updateData.length > 1) {
             const rtrn = _prev_layout != updateData[0];
             // console.log("==============shouldComponentUpdate==============");
@@ -34,13 +34,13 @@ export default class TraceUpdater extends Component {
     }
 
     render() {
-        var { id, gdID, sequentialUpdate, updateData } = this.props;
+        let { id, gdID, sequentialUpdate, updateData } = this.props;
         const traceColNames = ["hovertext", "text", "x", "y"];
-        var graphDiv = document.getElementById(gdID);
-        console.log("updateData: ", updateData);
+        let graphDiv = document.getElementById(gdID);
 
         if (graphDiv && Array.isArray(updateData) && updateData.length > 1) {
-            var trace, index, s_keys;
+            _prev_layout = updateData[0];
+            let trace, index, s_keys;
             graphDiv = graphDiv.getElementsByClassName('js-plotly-plot')[0];
             // console.log("graphDiv: ", graphDiv);
 
@@ -48,10 +48,12 @@ export default class TraceUpdater extends Component {
                 for (let i = 1; i < updateData.length; i++) {
                     trace = updateData[i];
                     // get the trace it's index and delete it from the trace object
+                    // as it is not a valid attribute for Plotly.restyle
                     index = trace.index
                     delete trace.index;
                     if (trace != null && index != null) {
-                        // put everything in the right format
+                        // put everything in the right format & call restyle for each
+                        // trace
                         for (const colName of traceColNames) {
                             if (trace[colName] == null) {
                                 delete trace[colName];
@@ -61,8 +63,8 @@ export default class TraceUpdater extends Component {
                             }
                         }
                         Plotly.restyle(graphDiv, trace, index);
-                    };
-                };
+                    }
+                }
             }
             else {
                 // Create a set-union of all the to-be-updated traces their 
@@ -74,30 +76,31 @@ export default class TraceUpdater extends Component {
 
                 // new variable to store the updated data in a compatible format to 
                 // call restyle only once
-                const singleUpdateData = { visible: [] };
+                const mergedUpdateData = { };
                 for (const k of s_keys) {
-                    singleUpdateData[k] = [];
+                    mergedUpdateData[k] = [];
                 }
-                const index_arr = [];
                 for (let i = 1; i < updateData.length; i++) {
                     trace = updateData[i];
-                    if (Array.isArray(trace.x) &&race.x.length < 1) {
+                    // delete the x & y trace if the length of the array is < 1
+                    if (Array.isArray(trace.x) && trace.x.length < 1) {
                         delete trace.x;
                         delete trace.y;
                     }
 
                     for (const k of s_keys) {
                         if (trace[k] === null) {
-                            singleUpdateData[k].push([]);
+                            mergedUpdateData[k].push([]);
                         } else {
-                            singleUpdateData[k].push(trace[k]);
+                            mergedUpdateData[k].push(trace[k]);
                         }
                     }
-                    index_arr.push(trace.index);
-                };
-                Plotly.restyle(graphDiv, singleUpdateData, index_arr);
+                }
+                let index_arr = mergedUpdateData['index'];
+                delete mergedUpdateData['index'];
+                Plotly.restyle(graphDiv, mergedUpdateData, index_arr);
             }
-        };
+        }
         return <div id={id}></div>;
     }
 }
