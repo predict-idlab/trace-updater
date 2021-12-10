@@ -41,7 +41,7 @@ export default class TraceUpdater extends Component {
         
         const filterTrace = (trace) => fromPairs(
             toPairs(trace)
-            .filter(([_, value]) => !!value)
+            .filter(([_, value]) => !isNil(value))
             .filter(([key, _]) => !['x','y'].includes(key) || trace.x !== [])
         );
 
