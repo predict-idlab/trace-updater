@@ -1,0 +1,2 @@
+plotly-resampler==0.2.2
+pandas==1.3.4
