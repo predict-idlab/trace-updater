@@ -1,6 +1,51 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { head, tail, isPlainObject, isArray, isNil, flatMap, keys, toPairs, fromPairs, mapValues, zipObject, isElement, uniq } from 'lodash';
+
+
+// HELPER FUNCTIONS //
+const plotlyRestyle = (graphDiv, { index, ...update }) =>
+    Plotly.restyle(graphDiv, update, index);
+
+const isValidTrace = (trace) =>
+    isPlainObject(trace) && !isNil(trace.index);
+
+const filterTrace = (trace) => fromPairs(
+    toPairs(trace)
+        .filter(([_, value]) => !isNil(value))
+        .filter(([key, _]) => !['x', 'y'].includes(key) || trace.x !== [])
+);
+
+const filterTraces = (traces) =>
+    traces
+        .filter(isValidTrace)
+        .map(filterTrace);
+
+const formatValue = (value) =>
+    isArray(value) ? [value] : value;
+
+const formatTrace = (trace) =>
+    mapValues(trace, formatValue);
+
+const formatTraces = (traces) =>
+    traces.map(formatTrace);
+
+const mergeKeys = (traces) =>
+    uniq(flatMap(traces, keys));
+
+const mergeValues = (traces, allkeys) =>
+    allkeys.map(
+        key => traces.map(
+            trace => trace[key] ?? []
+        )
+    );
+
+const mergeTraces = (traces) => {
+    const allkeys = mergeKeys(traces);
+    const allvalues = mergeValues(traces, allkeys);
+    return zipObject(allkeys, allvalues);
+};
+
 
 /**
  * TraceUpdater is a component which updates the trace-data of a plotly graph.
@@ -14,80 +59,33 @@ import { head, tail, isPlainObject, isArray, isNil, flatMap, keys, toPairs, from
  *       index under the `index` attribute
  */
 export default class TraceUpdater extends Component {
-    
-    static #previous_layout = null;
+
+    static #previousLayout = null;
 
     shouldComponentUpdate({ updateData }) {
-        return TraceUpdater.#previous_layout != head(updateData);
+        return isArray(updateData) && TraceUpdater.#previousLayout !== head(updateData);
     }
-    
-    render() {
-        /// VALIDATION ///
 
+    render() {
+        // VALIDATION //
         const { id, gdID, sequentialUpdate, updateData } = this.props;
-        if (!isArray(updateData) || !head(updateData.length)) throw Error(`Invalid updateData '${updateData}'`);
+        const idDiv = <div id={id}></div>;
+        if (!this.shouldComponentUpdate(this.props)) return idDiv;
         
         const graphDiv = document?.getElementById(gdID)?.getElementsByClassName('js-plotly-plot')?.[0];
-        if (!isElement(graphDiv)) throw Error(`Invalid graphDiv 'graphDiv' for gdID '${gdID}'`);
-        
-        
-        /// HELPER FUNCTIONS ///
+        if (!isElement(graphDiv)) throw new Error(`Invalid gdID '${gdID}'`);
 
-        const plotlyRestyle = ({ index, ...update }) =>
-            Plotly.restyle(graphDiv, update, index);
-
-        const isValidTrace = (trace) =>
-            isPlainObject(trace) && !isNil(trace.index);
-        
-        const filterTrace = (trace) => fromPairs(
-            toPairs(trace)
-            .filter(([_, value]) => !isNil(value))
-            .filter(([key, _]) => !['x','y'].includes(key) || trace.x !== [])
-        );
-
-        const filterTraces = (traces) =>
-            traces
-            .filter(isValidTrace)
-            .map(filterTrace);
-
-        const formatValue = (value) =>
-            isArray(value) ? [value] : value;
-
-        const formatTrace = (trace) =>
-            mapValues(trace, formatValue);
-
-        const formatTraces = (traces) =>
-            traces.map(formatTrace);
-
-        const mergeKeys = (traces) =>
-            uniq(flatMap(traces, keys));
-        
-        const mergeValues = (traces, allkeys) =>
-            allkeys.map(
-                key => traces.map(
-                    trace => trace[key] ?? []
-                )
-            );
-        
-        const mergeTraces = (traces) => {
-            const allkeys = mergeKeys(traces);
-            const allvalues = mergeValues(traces, allkeys);
-            return zipObject(allkeys, allvalues);
-        };
-
-
-        /// EXECUTION ///
-
-        TraceUpdater.#previous_layout = head(updateData);
+        // EXECUTION //
+        TraceUpdater.#previousLayout = head(updateData);
         const traces = filterTraces(tail(updateData));
 
         if (sequentialUpdate) {
-            formatTraces(traces).forEach(plotlyRestyle);
+            formatTraces(traces).forEach(trace => plotlyRestyle(graphDiv, trace));
         } else {
-            plotlyRestyle(mergeTraces(traces));
+            plotlyRestyle(graphDiv, mergeTraces(traces));
         }
 
-        return <div id={id}></div>;
+        return idDiv;
     }
 }
 
