@@ -71,7 +71,7 @@ export default class TraceUpdater extends Component {
         const { id, gdID, sequentialUpdate, updateData } = this.props;
         const idDiv = <div id={id}></div>;
         if (!this.shouldComponentUpdate(this.props)) return idDiv;
-        
+
         const graphDiv = document?.getElementById(gdID)?.getElementsByClassName('js-plotly-plot')?.[0];
         if (!isElement(graphDiv)) throw new Error(`Invalid gdID '${gdID}'`);
 
