@@ -17,14 +17,13 @@ fig = FigureResampler(go.Figure())
 fig.add_trace(go.Scattergl(name="noisy sine", showlegend=True), hf_x=x, hf_y=noisy_sin)
 
 
-# Construct app & it's layout
+# Construct app & its layout
 app = dash.Dash(__name__)
 
 app.layout = html.Div(
     [
         dcc.Graph(id="graph-id", figure=fig),
         trace_updater.TraceUpdater(id="trace-updater", gdID="graph-id"),
-        html.Div(id="output"),
     ]
 )
 
