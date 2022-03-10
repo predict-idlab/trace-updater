@@ -1,10 +1,24 @@
-import { Component } from 'react';
+import {Component} from 'react';
 import PropTypes from 'prop-types';
-import { head, tail, isPlainObject, isArray, isNil, flatMap, keys, toPairs, fromPairs, mapValues, zipObject, isElement, uniq } from 'lodash';
+import {
+    head,
+    tail,
+    isPlainObject,
+    isArray,
+    isNil,
+    flatMap,
+    keys,
+    toPairs,
+    fromPairs,
+    mapValues,
+    zipObject,
+    isElement,
+    uniq
+} from 'lodash';
 
 
 // HELPER FUNCTIONS //
-const plotlyRestyle = (graphDiv, { index, ...update }) =>
+const plotlyRestyle = (graphDiv, {index, ...update}) =>
     Plotly.restyle(graphDiv, update, index);
 
 const isValidTrace = (trace) =>
@@ -49,31 +63,35 @@ const mergeTraces = (traces) => {
 
 /**
  * TraceUpdater is a component which updates the trace-data of a plotly graph.
- * It takes the properties
- *  - gdID - which is the DCC.graph its id
- *  - sequentialUpdate - if true, each trace is updated sequentially;
- *      i.e. Plotly.restyle is called sequentially
- *  - updatedData - A list whose:
- *     * first object withholds the to-be applied layout
- *     * second to ... object contain the updated trace data and its corresponding
- *       index under the `index` attribute
  */
 export default class TraceUpdater extends Component {
 
     static #previousLayout = null;
 
-    shouldComponentUpdate({ updateData }) {
+    shouldComponentUpdate({updateData}) {
         return isArray(updateData) && TraceUpdater.#previousLayout !== head(updateData);
     }
 
     render() {
         // VALIDATION //
-        const { id, gdID, sequentialUpdate, updateData } = this.props;
+        const {id, gdID, sequentialUpdate, updateData} = this.props;
         const idDiv = <div id={id}></div>;
-        if (!this.shouldComponentUpdate(this.props)) return idDiv;
+        if (!this.shouldComponentUpdate(this.props)) {
+            return idDiv;
+        }
 
-        const graphDiv = document?.getElementById(gdID)?.getElementsByClassName('js-plotly-plot')?.[0];
-        if (!isElement(graphDiv)) throw new Error(`Invalid gdID '${gdID}'`);
+        // see this link for more information https://stackoverflow.com/a/34002028
+        let graphDiv = document?.querySelectorAll('div[id*="' + gdID + '"][class="dash-graph"]');
+        if (graphDiv.length > 1) {
+            throw new SyntaxError("TraceUpdater: multiple graphs with ID=\"" + gdID + "\" found; n=" + graphDiv.length + " \n(either multiple graphs with same ID's or current ID is a str-subset of other graph IDs)");
+        } else if (graphDiv.length < 1) {
+            throw new SyntaxError("TraceUpdater: no graphs with ID=\"" + gdID + "\" found");
+        }
+
+        graphDiv = graphDiv?.[0]?.getElementsByClassName('js-plotly-plot')?.[0];
+        if (!isElement(graphDiv)) {
+            throw new Error(`Invalid gdID '${gdID}'`);
+        }
 
         // EXECUTION //
         TraceUpdater.#previousLayout = head(updateData);
@@ -90,7 +108,7 @@ export default class TraceUpdater extends Component {
 }
 
 TraceUpdater.defaultProps = {
-    sequentialUpdate: true,
+    sequentialUpdate: false,
 };
 
 TraceUpdater.propTypes = {
@@ -100,14 +118,25 @@ TraceUpdater.propTypes = {
     id: PropTypes.string,
 
     /**
-     * The id of the graph-div whose traces should be
+     * The id of the graph-div whose traces should be updated.
+     *
+     * .. Note:
+     *
+     *   * if you use multiple graphs; each graph MUST have a unique id; otherwise we
+     *     cannot guarantee that resampling will work correctly.
+     *   * TraceUpdater will determine the html-graph-div by performing partial matching
+     *     on the "id" property (using `gdID`) of all divs with classname="dash-graph".
+     *     It will select the first item of that match list; so if multiple same
+     *     graph-div IDs are used, or one graph-div-ID is a subset of the other (partial
+     *     matching) there is no guarantee that the correct div will be selected.
      */
     gdID: PropTypes.string.isRequired,
 
     /**
      * Bool indicating whether the figure should be redrawn sequentially (i.e.)
      * calling the restyle multiple times or at once.
-     * (still needs to be determined which is faster has the lowest memory peak)
+     * (still needs to be determined which is faster has the lowest memory peak),
+     * by default False.
      */
     sequentialUpdate: PropTypes.bool,
 
