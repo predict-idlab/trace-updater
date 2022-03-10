@@ -71,7 +71,7 @@ We highly encourage contributing to this project. Users can always submit an iss
 4. If it works, then you can publish the component to NPM and PyPI:
     1. Publish on PyPI
         ```bash
-        $ twine upload dist/*
+        $ python3 -m twine upload --repository trace_updater dist/* 
         ```
     2. Cleanup the dist folder (optional)
         ```bash
