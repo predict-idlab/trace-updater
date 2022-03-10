@@ -1,6 +1,6 @@
 {
   "src/lib/components/TraceUpdater.react.js": {
-    "description": "TraceUpdater is a component which updates the trace-data of a plotly graph.\nIt takes the properties\n - gdID - which is the DCC.graph its id\n - sequentialUpdate - if true, each trace is updated sequentially;\n     i.e. Plotly.restyle is called sequentially\n - updatedData - A list whose:\n    * first object withholds the to-be applied layout\n    * second to ... object contain the updated trace data and its corresponding\n      index under the `index` attribute",
+    "description": "TraceUpdater is a component which updates the trace-data of a plotly graph.",
     "displayName": "TraceUpdater",
     "methods": [],
     "props": {
@@ -16,16 +16,16 @@
           "name": "string"
         },
         "required": true,
-        "description": "The id of the graph-div whose traces should be"
+        "description": "The id of the graph-div whose traces should be updated.\n\n.. Note:\n\n  * if you use multiple graphs; each graph MUST have a unique id; otherwise we\n    cannot guarantee that resampling will work correctly.\n  * TraceUpdater will determine the html-graph-div by performing partial matching\n    on the \"id\" property (using `gdID`) of all divs with classname=\"dash-graph\".\n    It will select the first item of that match list; so if multiple same\n    graph-div IDs are used, or one graph-div-ID is a subset of the other (partial\n    matching) there is no guarantee that the correct div will be selected."
       },
       "sequentialUpdate": {
         "type": {
           "name": "bool"
         },
         "required": false,
-        "description": "Bool indicating whether the figure should be redrawn sequentially (i.e.)\ncalling the restyle multiple times or at once.\n(still needs to be determined which is faster has the lowest memory peak)",
+        "description": "Bool indicating whether the figure should be redrawn sequentially (i.e.)\ncalling the restyle multiple times or at once.\n(still needs to be determined which is faster has the lowest memory peak),\nby default False.",
         "defaultValue": {
-          "value": "true",
+          "value": "false",
           "computed": false
         }
       },
