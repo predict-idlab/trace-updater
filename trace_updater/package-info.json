@@ -1,6 +1,6 @@
 {
   "name": "trace_updater",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Dash component which allows to update a dcc.Graph its traces. This component is data efficient as it (1) only sends the to-be-updated traces (and not the whole) from the back-end to the client-side and (2) only updates the traces that have changed (and does not redraw the whole figure).",
   "repository": {
     "type": "git",

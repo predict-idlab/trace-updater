@@ -1,5 +1,6 @@
 # AUTO GENERATED FILE - DO NOT EDIT
 
+#' @export
 traceUpdater <- function(id=NULL, gdID=NULL, sequentialUpdate=NULL, updateData=NULL) {
     
     props <- list(id=id, gdID=gdID, sequentialUpdate=sequentialUpdate, updateData=updateData)
