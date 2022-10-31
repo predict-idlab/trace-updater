@@ -81,7 +81,7 @@ export default class TraceUpdater extends Component {
         }
 
         // see this link for more information https://stackoverflow.com/a/34002028
-        let graphDiv = document?.querySelectorAll('div[id*="' + gdID + '"][class="dash-graph"]');
+        let graphDiv = document?.querySelectorAll('div[id*="' + gdID + '"][class*="dash-graph"]');
         if (graphDiv.length > 1) {
             throw new SyntaxError("TraceUpdater: multiple graphs with ID=\"" + gdID + "\" found; n=" + graphDiv.length + " \n(either multiple graphs with same ID's or current ID is a str-subset of other graph IDs)");
         } else if (graphDiv.length < 1) {
