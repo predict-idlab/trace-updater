@@ -1,4 +1,4 @@
-import {Component} from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
     head,
@@ -18,7 +18,7 @@ import {
 
 
 // HELPER FUNCTIONS //
-const plotlyRestyle = (graphDiv, {index, ...update}) =>
+const plotlyRestyle = (graphDiv, { index, ...update }) =>
     Plotly.restyle(graphDiv, update, index);
 
 const isValidTrace = (trace) =>
@@ -68,13 +68,13 @@ export default class TraceUpdater extends Component {
 
     static #previousLayout = null;
 
-    shouldComponentUpdate({updateData}) {
+    shouldComponentUpdate({ updateData }) {
         return isArray(updateData) && TraceUpdater.#previousLayout !== head(updateData);
     }
 
     render() {
         // VALIDATION //
-        const {id, gdID, sequentialUpdate, updateData} = this.props;
+        const { id, gdID, sequentialUpdate, updateData } = this.props;
         const idDiv = <div id={id}></div>;
         if (!this.shouldComponentUpdate(this.props)) {
             return idDiv;
@@ -93,14 +93,33 @@ export default class TraceUpdater extends Component {
             throw new Error(`Invalid gdID '${gdID}'`);
         }
 
+        // Query the visible state from the graph and first update the visible indices
+        let visible_indices = [];
+        graphDiv.data.forEach((trace, index) => {
+            if (trace.visible == true || trace.visible == undefined) {
+                visible_indices.push(index);
+            }
+        });
+        // console.log("visible_indices: " + visible_indices);
+
+
         // EXECUTION //
         TraceUpdater.#previousLayout = head(updateData);
-        const traces = filterTraces(tail(updateData));
+        // Split the updateData into visible and invisible traces
+        const visibleTraces = filterTraces(tail(updateData).filter(trace => visible_indices.includes(trace.index)));
+        const invisibleTraces = filterTraces(tail(updateData).filter(trace => !visible_indices.includes(trace.index)));
 
+        // First update the visible traces, then the invisible ones
         if (sequentialUpdate) {
-            formatTraces(traces).forEach(trace => plotlyRestyle(graphDiv, trace));
+            formatTraces(visibleTraces).forEach(trace => plotlyRestyle(graphDiv, trace));
+            formatTraces(invisibleTraces).forEach(trace => plotlyRestyle(graphDiv, trace));
         } else {
-            plotlyRestyle(graphDiv, mergeTraces(traces));
+            if (visibleTraces.length > 0) {
+                plotlyRestyle(graphDiv, mergeTraces(visibleTraces));
+            }
+            if (invisibleTraces.length > 0) {
+                plotlyRestyle(graphDiv, mergeTraces(invisibleTraces));
+            }
         }
 
         return idDiv;
