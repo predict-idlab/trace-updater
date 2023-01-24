@@ -1,10 +1,10 @@
 import trace_updater
 import dash
-from dash.dependencies import Input, Output
+# from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 from dash import html, dcc
 from plotly_resampler import FigureResampler
-from plotly_resampler.downsamplers import LTTB
+# from plotly_resampler.aggregation import LTTB, EveryNthPoint
 import numpy as np
 
 # Construct a high-frequency signal

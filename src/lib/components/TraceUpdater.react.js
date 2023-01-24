@@ -12,9 +12,9 @@ import {
     fromPairs,
     mapValues,
     zipObject,
-    isElement,
     uniq
 } from 'lodash';
+import { getGraphDiv } from '../utils/updaterUtils';
 
 
 // HELPER FUNCTIONS //
@@ -68,41 +68,25 @@ export default class TraceUpdater extends Component {
 
     static #previousLayout = null;
 
-    shouldComponentUpdate({updateData}) {
-        return isArray(updateData) && TraceUpdater.#previousLayout !== head(updateData);
+    shouldComponentUpdate({ updateData }) {
+        return isArray(updateData) && updateData.length > 1 && TraceUpdater.#previousLayout !== head(updateData);
     }
 
     render() {
         // VALIDATION //
         const {id, gdID, sequentialUpdate, updateData} = this.props;
         const idDiv = <div id={id}></div>;
-        if (!this.shouldComponentUpdate(this.props)) {
-            return idDiv;
-        }
-
-        // see this link for more information https://stackoverflow.com/a/34002028
-        let graphDiv = document?.querySelectorAll('div[id*="' + gdID + '"][class*="dash-graph"]');
-        if (graphDiv.length > 1) {
-            throw new SyntaxError("TraceUpdater: multiple graphs with ID=\"" + gdID + "\" found; n=" + graphDiv.length + " \n(either multiple graphs with same ID's or current ID is a str-subset of other graph IDs)");
-        } else if (graphDiv.length < 1) {
-            throw new SyntaxError("TraceUpdater: no graphs with ID=\"" + gdID + "\" found");
-        }
-
-        graphDiv = graphDiv?.[0]?.getElementsByClassName('js-plotly-plot')?.[0];
-        if (!isElement(graphDiv)) {
-            throw new Error(`Invalid gdID '${gdID}'`);
-        }
+        if (!this.shouldComponentUpdate(this.props)) { return idDiv; }
 
         // EXECUTION //
         TraceUpdater.#previousLayout = head(updateData);
+        let graphDiv = getGraphDiv(gdID);
         const traces = filterTraces(tail(updateData));
-
         if (sequentialUpdate) {
             formatTraces(traces).forEach(trace => plotlyRestyle(graphDiv, trace));
-        } else {
-            plotlyRestyle(graphDiv, mergeTraces(traces));
-        }
+        } else { plotlyRestyle(graphDiv, mergeTraces(traces)); }
 
+        // RETURN //
         return idDiv;
     }
 }
